@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-18
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -16,9 +16,9 @@
 
 #define R 6.371e6 // meters
 
-float deg2rad(float x)
+float deg2rad(float deg)
 {
-    return x * M_PI / 180;
+    return deg * (M_PI / 180);
 }
 
 float distance(Point p1, Point p2)
@@ -26,7 +26,7 @@ float distance(Point p1, Point p2)
     float φ1 = deg2rad(p1.lat);
     float φ2 = deg2rad(p2.lat);
     float Δφ = deg2rad(p2.lat - p1.lat);
-    float Δλ = deg2rad(p2.lat - p1.lat);
+    float Δλ = deg2rad(p2.lon - p1.lon);
 
     float a = sinf(Δφ / 2) * sinf(Δφ / 2) + cosf(φ1) * cosf(φ2) * sinf(Δλ / 2) * sinf(Δλ / 2);
     float c = 2 * atan2f(sqrtf(a), sqrtf(1 - a));
@@ -45,11 +45,6 @@ float bear(float φ1, float λ1, float φ2, float λ2)
     return brng;
 }
 
-/*
- CROSSARC Calculates the shortest distance in meters
- between an arc (defined by p1 and p2) and a third point, p3.
- Input lat1,lon1,lat2,lon2,lat3,lon3 in degrees.
-*/
 float crossarc(Point p1, Point p2, Point p3)
 {
     float φ1 = deg2rad(p1.lat);
@@ -80,7 +75,7 @@ float crossarc(Point p1, Point p2, Point p3)
 
         float d12 = distance(p1, p2);
         float d14 = acosf(cosf(d13 / R) / cosf(dXt / R)) * R;
-        dXa = (d14 > d12) ? distance(p2, p3) : dXt;
+        dXa = (d14 > d12) ? distance(p2, p3) : fabs(dXt);
     }
 
     return dXa;
