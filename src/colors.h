@@ -29,4 +29,4 @@
 #define CYAN "\x1b[36m"
 #define GRAY "\x1b[37m"
 
-#endif // COLORS_H
+#endif
