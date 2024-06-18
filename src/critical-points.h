@@ -1,3 +1,4 @@
+
 /*
  * Filename: section.h
  *
@@ -11,30 +12,26 @@
  * License: See LICENSE file in the project root for license information.
  */
 
-#ifndef SECTION_H
-#define SECTION_H
+#ifndef CRITICAL_POINTS_H
+#define CRITICAL_POINTS_H
 
 #include "latlon.h"
+#include "section.h"
 #include <omp.h>
-
-#define HISTOGRAM_BINS 90
-
-typedef struct
-{
-    omp_lock_t lock;
-    int histogram[HISTOGRAM_BINS]; // from 0 to 90km/h
-} Metrics;
 
 typedef struct
 {
     int id;
-    int n_path;
-    Point *path;
+    Point p;
+    int type;
     Metrics metrics;
-} Section;
+    omp_lock_t lock;
+} CriticalPoint;
 
-float section_length(Section *ptr_s);
-float section_d2p(Section *ptr_s, Point p);
-void section_add_data(Section *ptr_s, float speed);
+typedef struct
+{
+    CriticalPoint *p;
+    int n;
+} CriticalPoints;
 
 #endif

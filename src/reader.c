@@ -110,8 +110,8 @@ int reader_read(DataReader *reader, BusRecord *data)
                      &_tmp,
                      &_tmp,
                      &_tmp,
-                     &data->p.lat,
-                     &data->p.lon);
+                     &data->p.lon,
+                     &data->p.lat);
 
     // Change file.
     if (got == 0 || got == -1)
