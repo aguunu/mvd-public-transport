@@ -61,7 +61,7 @@ STACK := -fstack-protector-all -Wstack-protector
 WARNS := -Wall -Wextra -pedantic # -pedantic warns on language standards
 
 # Flags for compiling
-CFLAGS := -O1 $(STD) $(STACK) $(WARNS)
+CFLAGS := -O2 $(STD) $(STACK) $(WARNS)
 
 # Debug options
 DEBUG := -g3 -DDEBUG=1
