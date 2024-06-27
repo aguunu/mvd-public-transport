@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -23,18 +23,18 @@ typedef struct
 {
     omp_lock_t lock;
     int histogram[HISTOGRAM_BINS]; // from 0 to 90km/h
-} Metrics;
+} metrics_t;
 
 typedef struct
 {
     int id;
     int n_path;
-    Point *path;
-    Metrics metrics;
-} Section;
+    point_t *path;
+    metrics_t metrics;
+} section_t;
 
-float section_length(Section *ptr_s);
-float section_d2p(Section *ptr_s, Point p);
-void section_add_data(Section *ptr_s, float speed);
+float section_length(section_t *ptr_s);
+float section_d2p(section_t *ptr_s, point_t p);
+void section_add_data(section_t *ptr_s, float speed);
 
 #endif

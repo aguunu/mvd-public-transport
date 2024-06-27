@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-18
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void load_critical_points(CriticalPoints *cps)
+void load_critical_points(crit_points_t *cps)
 {
     char *file_path = "../critical-points.csv";
 
@@ -30,7 +30,7 @@ void load_critical_points(CriticalPoints *cps)
 
     FILE *fp = fopen(file_path, "r");
 
-    cps->p = (CriticalPoint *)malloc(sizeof(CriticalPoint) * alloc_size);
+    cps->p = (crit_point_t *)malloc(sizeof(crit_point_t) * alloc_size);
     cps->n = 0;
 
     while (1)
@@ -38,10 +38,10 @@ void load_critical_points(CriticalPoints *cps)
         if (cps->n == alloc_size)
         {
             alloc_size *= 2;
-            cps->p = (CriticalPoint *)realloc(cps->p, sizeof(CriticalPoint) * alloc_size);
+            cps->p = (crit_point_t *)realloc(cps->p, sizeof(crit_point_t) * alloc_size);
         }
 
-        CriticalPoint *cp = &cps->p[cps->n];
+        crit_point_t *cp = &cps->p[cps->n];
         int got = fscanf(fp, "%f,%f,%d",
                          &cp->p.lat,
                          &cp->p.lon,
@@ -63,7 +63,7 @@ void load_critical_points(CriticalPoints *cps)
     fprintf(stdout, GREEN "+ Added %d critical points.\n", cps->n);
 }
 
-void destroy_critical_points(CriticalPoints *cps)
+void destroy_critical_points(crit_points_t *cps)
 {
     for (int i = 0; i < cps->n; i++)
     {
@@ -73,7 +73,7 @@ void destroy_critical_points(CriticalPoints *cps)
     free(cps->p);
 }
 
-void read_sections(Section **sections, FILE *fp)
+void read_sections(section_t **sections, FILE *fp)
 {
     char *line = NULL;
     size_t len = 0;
@@ -85,16 +85,16 @@ void read_sections(Section **sections, FILE *fp)
         assert(sections[s_code] == NULL);
         int arr_size = 256;
 
-        sections[s_code] = calloc(1, sizeof(Section));
-        Section *section = sections[s_code];
+        sections[s_code] = calloc(1, sizeof(section_t));
+        section_t *section = sections[s_code];
 
-        section->path = (Point *)malloc(sizeof(Point) * arr_size);
+        section->path = (point_t *)malloc(sizeof(point_t) * arr_size);
         section->n_path = 0;
         omp_init_lock(&section->metrics.lock);
         char *token = strtok(line, ";");
         while (token)
         {
-            Point p;
+            point_t p;
             sscanf(token, "[%f,%f]", &p.lon, &p.lat);
             section->id = s_code;
             section->path[section->n_path] = p;
@@ -102,7 +102,7 @@ void read_sections(Section **sections, FILE *fp)
             if (section->n_path == arr_size)
             {
                 arr_size *= 2;
-                section->path = (Point *)realloc(section->path, sizeof(Point) * arr_size);
+                section->path = (point_t *)realloc(section->path, sizeof(point_t) * arr_size);
             }
             token = strtok(NULL, ";");
         }
@@ -113,7 +113,7 @@ void read_sections(Section **sections, FILE *fp)
     printf(GREEN "+ Added %d sections.\n" NO_COLOR, s_code);
 }
 
-void read_variant_info(Section **sections, VariantInfo **vs, FILE *fp)
+void read_variant_info(section_t **sections, variant_t **vs, FILE *fp)
 {
     char *line = NULL;
     size_t len = 0;
@@ -125,8 +125,8 @@ void read_variant_info(Section **sections, VariantInfo **vs, FILE *fp)
         char *token = strtok(line, ",");
         int v_code = atoi(token);
 
-        vs[v_code] = (VariantInfo *)malloc(sizeof(VariantInfo));
-        VariantInfo *v = vs[v_code];
+        vs[v_code] = (variant_t *)malloc(sizeof(variant_t));
+        variant_t *v = vs[v_code];
 
         // get new token
         token = strtok(NULL, ",");
@@ -148,13 +148,13 @@ void read_sections_variants(model_t *model)
 {
     // Read section info
     FILE *fp_sections = fopen("../sections.txt", "r");
-    model->sections = (Section **)calloc(MAX_SECTIONS, sizeof(Section *));
+    model->sections = (section_t **)calloc(MAX_SECTIONS, sizeof(section_t *));
     read_sections(model->sections, fp_sections);
     fclose(fp_sections);
 
     // Read variant sections info
     FILE *fp_vs = fopen("../variant-sections.txt", "r");
-    model->variants = (VariantInfo **)calloc(MAX_VARIANT, sizeof(VariantInfo *));
+    model->variants = (variant_t **)calloc(MAX_VARIANT, sizeof(variant_t *));
     read_variant_info(model->sections, model->variants, fp_vs);
     fclose(fp_vs);
 }
@@ -206,7 +206,7 @@ void save_model(model_t *model)
 
     for (int i = 0; i < MAX_SECTIONS; i++)
     {
-        Section *s = model->sections[i];
+        section_t *s = model->sections[i];
         if (!s)
         {
             continue;

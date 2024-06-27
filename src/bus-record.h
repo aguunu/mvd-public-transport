@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -26,15 +26,7 @@ typedef enum
     METROPOLITANA = 3,
     INTER_URBANA = 4,
     CENTRICA_MVD = 5,
-} VariantType;
-
-typedef struct
-{
-    int id;
-    VariantType type;
-    Section *sections;
-    int n_sections;
-} Variant;
+} variant_type;
 
 typedef struct
 {
@@ -48,7 +40,7 @@ typedef struct
     int type;
     int destination;
     int subsystem;
-    Point p;
-} BusRecord;
+    point_t p;
+} record_t;
 
 #endif

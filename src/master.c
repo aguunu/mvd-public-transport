@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-18
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -26,17 +26,17 @@
 #define MAX_MM 60
 #define TRIP_LENGTH_THRESHOLD 60 * 60 * 3
 
-void work_map_init(Entry **map)
+void work_map_init(work_t **map)
 {
     int n = MAX_VARIANT * MAX_HH * MAX_MM;
-    map = (Entry **)malloc(sizeof(Entry *) * n);
+    map = (work_t **)malloc(sizeof(work_t *) * n);
     for (int i = 0; i < n; i++)
     {
         map[i] = NULL;
     }
 }
 
-int work_map_add(Entry **map, BusRecord data, Entry *trip)
+int work_map_add(work_t **map, record_t data, work_t *trip)
 {
     assert(data.hh < MAX_HH);
     assert(data.mm < MAX_MM);
@@ -46,7 +46,7 @@ int work_map_add(Entry **map, BusRecord data, Entry *trip)
 
     if (map[idx] != NULL)
     {
-        BusRecord *prev = &map[idx]->records[0];
+        record_t *prev = &map[idx]->records[0];
         if (prev->id_bus != data.id_bus)
         {
             return 1;
@@ -60,7 +60,7 @@ int work_map_add(Entry **map, BusRecord data, Entry *trip)
 
     if (trip != NULL || !map[idx])
     {
-        map[idx] = (Entry *)malloc(sizeof(Entry));
+        map[idx] = (work_t *)malloc(sizeof(work_t));
         map[idx]->n = 0;
     }
     assert(trip != map[idx]);
@@ -73,7 +73,7 @@ int work_map_add(Entry **map, BusRecord data, Entry *trip)
     return 0;
 }
 
-int master(DataReader *reader, model_t *model)
+int master(reader_t *reader, model_t *model)
 {
 #pragma omp parallel
     {
@@ -84,13 +84,13 @@ int master(DataReader *reader, model_t *model)
             int workers = 0;
 
             int n = MAX_VARIANT * MAX_HH * MAX_MM;
-            Entry **map = (Entry **)malloc(sizeof(Entry *) * n);
+            work_t **map = (work_t **)malloc(sizeof(work_t *) * n);
             for (int i = 0; i < n; i++)
             {
                 map[i] = NULL;
             }
 
-            BusRecord data;
+            record_t data;
             int reader_err;
 
             while ((reader_err = reader_read(reader, &data)) == 0)
@@ -110,7 +110,7 @@ int master(DataReader *reader, model_t *model)
                     continue;
                 }
 
-                Entry *trip = NULL;
+                work_t *trip = NULL;
                 if (work_map_add(map, data, trip) != 0)
                 {
                     // If error while adding continue
@@ -133,7 +133,7 @@ int master(DataReader *reader, model_t *model)
             {
                 if (map[i] != NULL)
                 {
-                    Entry *trip = map[i];
+                    work_t *trip = map[i];
 #pragma omp task default(none) firstprivate(trip) firstprivate(model)
                     {
                         assert(trip != NULL);

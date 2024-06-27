@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-18
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -23,21 +23,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-void section_analysis(Entry *data, VariantInfo *info)
+void section_analysis(work_t *data, variant_t *info)
 {
     int n_stops = info->n_sections + 1;
 
     // float stop_arrival_time[n_stops];
     float err[n_stops];
-    BusRecord nearest_data[n_stops];
+    record_t nearest_data[n_stops];
     for (int i = 0; i < info->n_sections; i++)
     {
-        Point stop = info->sections[i]->path[0];
+        point_t stop = info->sections[i]->path[0];
         err[i] = -1;
 
         for (int j = 0; j < data->n; j++)
         {
-            BusRecord record = data->records[j];
+            record_t record = data->records[j];
 
             float d = distance(stop, record.p);
 
@@ -60,8 +60,8 @@ void section_analysis(Entry *data, VariantInfo *info)
             continue;
         }
 
-        BusRecord data1 = nearest_data[i];
-        BusRecord data2 = nearest_data[i + 1];
+        record_t data1 = nearest_data[i];
+        record_t data2 = nearest_data[i + 1];
 
         float delta_x = section_length(info->sections[i]);
         time_t delta_t = data2.timestamp - data1.timestamp;
@@ -82,13 +82,13 @@ void section_analysis(Entry *data, VariantInfo *info)
     }
 }
 
-void instant_speed_analysis(Entry *buf, CriticalPoints *critical_points)
+void instant_speed_analysis(work_t *buf, crit_points_t *critical_points)
 {
     float instant_speed[buf->n - 1];
     for (int i = 0; i < buf->n - 1; i++)
     {
-        BusRecord data1 = buf->records[i];
-        BusRecord data2 = buf->records[i + 1];
+        record_t data1 = buf->records[i];
+        record_t data2 = buf->records[i + 1];
 
         float delta_d = distance(data1.p, data2.p);
         float delta_t = (float)(data2.timestamp - data1.timestamp);
@@ -109,7 +109,7 @@ void instant_speed_analysis(Entry *buf, CriticalPoints *critical_points)
         }
         for (int j = 0; j < critical_points->n; j++)
         {
-            CriticalPoint *cp = &critical_points->p[j];
+            crit_point_t *cp = &critical_points->p[j];
             float d = crossarc(data1.p, data2.p, cp->p);
             if (d < RADIUS_THRESHOLD_M && instant_speed[i] > SPEED_LIMIT_KM_H)
             {
@@ -125,7 +125,7 @@ void instant_speed_analysis(Entry *buf, CriticalPoints *critical_points)
     }
 }
 
-void do_work(Entry *buf, VariantInfo *info, CriticalPoints *critical_points)
+void do_work(work_t *buf, variant_t *info, crit_points_t *critical_points)
 {
     assert(buf->n > 0);
     assert(buf->n < MAX_DATA_PER_TRIP);

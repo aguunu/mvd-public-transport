@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -22,12 +22,12 @@ typedef struct
     FILE **files;
     int cursor;
     int n_files;
-} DataReader;
+} reader_t;
 
-int reader_init(DataReader *reader, char *file_path);
+int reader_init(reader_t *reader, char *file_path);
 
-void reader_destroy(DataReader *reader);
+void reader_destroy(reader_t *reader);
 
-int reader_read(DataReader *reader, BusRecord *data);
+int reader_read(reader_t *reader, record_t *data);
 
 #endif

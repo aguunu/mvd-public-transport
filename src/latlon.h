@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -18,9 +18,9 @@ typedef struct
 {
     float lat;
     float lon;
-} Point;
+} point_t;
 
-float deg2grad(Point p);
+float deg2grad(point_t p);
 
 /*
  This uses the ‘haversine’ formula to calculate the great-circle
@@ -29,15 +29,15 @@ float deg2grad(Point p);
  between the points (ignoring any hills they fly over, of course!).
  Input lat1, lon1, lat1, lon2 in degrees.
 */
-float distance(Point p1, Point p2);
+float distance(point_t p1, point_t p2);
 
-float bear(float φ1, float λ1, float φ2, float λ2);
+float bear(float phi1, float lambda1, float phi2, float lambda2);
 
 /*
  Calculates the shortest distance in meters between an arc
  (defined by p1 and p2) and a third point, p3.
  Input lat1, lon1, lat2, lon2, lat3, lon3 in degrees.
 */
-float crossarc(Point p1, Point p2, Point p3);
+float crossarc(point_t p1, point_t p2, point_t p3);
 
 #endif

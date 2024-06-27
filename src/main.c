@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-18
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     model_t model;
     load_model(&model);
 
-    DataReader reader;
+    reader_t reader;
     int err = reader_init(&reader, options.file_name);
 
     master(&reader, &model);

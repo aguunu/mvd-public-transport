@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-18
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -23,15 +23,15 @@
 
 typedef struct
 {
-    Section *sections[MAX_SECTIONS_PER_VARIANT];
+    section_t *sections[MAX_SECTIONS_PER_VARIANT];
     int n_sections;
-} VariantInfo;
+} variant_t;
 
 typedef struct
 {
-    VariantInfo **variants;
-    Section **sections;
-    CriticalPoints critical_points;
+    variant_t **variants;
+    section_t **sections;
+    crit_points_t critical_points;
 } model_t;
 
 void load_model(model_t *model);

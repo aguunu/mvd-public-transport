@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-06-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void reader_destroy(DataReader *reader)
+void reader_destroy(reader_t *reader)
 {
     for (int i = reader->cursor; i < reader->n_files; i++)
     {
@@ -25,7 +25,7 @@ void reader_destroy(DataReader *reader)
     free(reader->files);
 }
 
-int reader_init(DataReader *reader, char *file_path)
+int reader_init(reader_t *reader, char *file_path)
 {
     // Init structure
     reader->files = NULL;
@@ -88,7 +88,7 @@ int reader_init(DataReader *reader, char *file_path)
     return 0;
 }
 
-int reader_read(DataReader *reader, BusRecord *data)
+int reader_read(reader_t *reader, record_t *data)
 {
     // Check if no files left
     if (reader->cursor == reader->n_files)
