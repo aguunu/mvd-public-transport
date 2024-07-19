@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-07-18
+ * Last Modified: 2024-07-19
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -55,9 +55,12 @@ void load_points(model_t *model, char *file_path)
             break;
         }
         omp_init_lock(&cp->lock);
-        for (int i = 0; i < HISTOGRAM_BINS; i++)
+        for (int hh = 0; hh < 24; hh++)
         {
-            cp->metrics.histogram[i] = 0;
+            for (int i = 0; i < HISTOGRAM_BINS; i++)
+            {
+                cp->metrics.histogram[hh][i] = 0;
+            }
         }
         cps->n++;
     }
@@ -253,13 +256,17 @@ void save_model(model_t *model)
             continue;
         }
 
-        fprintf(fp, "%d,", i);
-        fprintf(fp, "[");
-        for (int j = 0; j < HISTOGRAM_BINS; j++)
+        fprintf(fp, "%d", i);
+        for (int hh = 0; hh < 24; hh++)
         {
-            fprintf(fp, "%d,", s->metrics.histogram[j]);
+            fprintf(fp, ",[");
+            for (int j = 0; j < HISTOGRAM_BINS; j++)
+            {
+                fprintf(fp, "%d;", s->metrics.histogram[hh][j]);
+            }
+            fprintf(fp, "]");
         }
-        fprintf(fp, "]\n");
+        fprintf(fp, "\n");
     }
     fclose(fp);
 }

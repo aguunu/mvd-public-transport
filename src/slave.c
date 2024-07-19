@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-19
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 void section_analysis(work_t *data, variant_t *info)
 {
@@ -73,11 +74,19 @@ void section_analysis(work_t *data, variant_t *info)
         }
 
         avg_speed[i] = (delta_x / delta_t) * 3.6;
-        int round_speed = (unsigned int)avg_speed[i];
+        unsigned int round_speed = (unsigned int)avg_speed[i];
+
         if (round_speed < HISTOGRAM_BINS)
         {
+            time_t montevideo_time = data1.timestamp - 3600 * 3; // Montevideo time zone UTC-3
+            struct tm *timeinfo;
+            timeinfo = gmtime(&montevideo_time);
+
+            int hh = timeinfo->tm_hour;
+            assert(0 <= hh && hh < 24);
+
 #pragma omp atomic
-            info->sections[i]->metrics.histogram[round_speed]++;
+            info->sections[i]->metrics.histogram[hh][round_speed]++;
         }
     }
 }
@@ -117,8 +126,15 @@ void instant_speed_analysis(work_t *buf, crit_points_t *critical_points)
                 if (round_speed < HISTOGRAM_BINS)
                 {
                     assert(round_speed >= 0);
+                    time_t montevideo_time = data1.timestamp - 3600 * 3; // Montevideo time zone UTC-3
+                    struct tm *timeinfo;
+                    timeinfo = gmtime(&montevideo_time);
+
+                    int hh = timeinfo->tm_hour;
+                    assert(0 <= hh && hh < 24);
+
 #pragma omp atomic
-                    cp->metrics.histogram[round_speed]++;
+                    cp->metrics.histogram[hh][round_speed]++;
                 }
             }
         }
@@ -137,7 +153,7 @@ void do_work(work_t *buf, variant_t *info, crit_points_t *critical_points)
         section_analysis(buf, info);
     }
 
-    instant_speed_analysis(buf, critical_points);
+    // instant_speed_analysis(buf, critical_points);
 
     free(buf);
 }

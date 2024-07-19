@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-19
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -19,10 +19,13 @@
 
 #define HISTOGRAM_BINS 90
 
+#define WEEKDAY 0
+#define WEEKEND 1
+
 typedef struct
 {
     omp_lock_t lock;
-    int histogram[HISTOGRAM_BINS]; // from 0 to 90km/h
+    int histogram[24][HISTOGRAM_BINS]; // from 0 to 90km/h
 } metrics_t;
 
 typedef struct

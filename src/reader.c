@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-07-18
+ * Last Modified: 2024-07-19
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -92,7 +92,7 @@ int reader_read(reader_t *reader, record_t *data)
     }
     else if (got != 12)
     {
-        fprintf(stderr, "Expected %d, got %d values from\n", 12, got);
+        fprintf(stderr, "Expected %d, got %d values\n", 12, got);
         return 1;
     }
 

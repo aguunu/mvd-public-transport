@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-17
+ * Last Modified: 2024-07-19
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -53,7 +53,7 @@ void config_init(config_t *c, char *path)
     c->input_variants = variants.u.s;
     c->input_points = points.u.s;
     c->output_results = results.u.s;
-    
+
     // c->threads = threads.u.i;
     // c->memory = threads.u.i;
 
