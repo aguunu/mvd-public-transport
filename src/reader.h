@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-18
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -15,6 +15,7 @@
 #define READER_H
 
 #include "bus-record.h"
+#include "config.h"
 #include <stdio.h>
 
 typedef struct
@@ -24,7 +25,7 @@ typedef struct
     int n_files;
 } reader_t;
 
-int reader_init(reader_t *reader, char *file_path);
+int reader_init(reader_t *reader, config_t *config);
 
 void reader_destroy(reader_t *reader);
 

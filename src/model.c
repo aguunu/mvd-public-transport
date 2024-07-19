@@ -6,14 +6,14 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-18
  *
  * License: See LICENSE file in the project root for license information.
  */
 
 #include "model.h"
 #include "colors.h"
-#include "critical-points.h"
+#include "config.h"
 #include "latlon.h"
 #include "section.h"
 #include <assert.h>
@@ -22,13 +22,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-void load_critical_points(crit_points_t *cps)
+void load_points(model_t *model, char *file_path)
 {
-    char *file_path = "../critical-points.csv";
+    FILE *fp = fopen(file_path, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Fail to open %s.\n", file_path);
+    }
+
+    crit_points_t *cps = &model->critical_points;
 
     int alloc_size = 256;
-
-    FILE *fp = fopen(file_path, "r");
 
     cps->p = (crit_point_t *)malloc(sizeof(crit_point_t) * alloc_size);
     cps->n = 0;
@@ -63,7 +67,7 @@ void load_critical_points(crit_points_t *cps)
     fprintf(stdout, GREEN "+ Added %d critical points.\n", cps->n);
 }
 
-void destroy_critical_points(crit_points_t *cps)
+void destroy_points(crit_points_t *cps)
 {
     for (int i = 0; i < cps->n; i++)
     {
@@ -73,8 +77,17 @@ void destroy_critical_points(crit_points_t *cps)
     free(cps->p);
 }
 
-void read_sections(section_t **sections, FILE *fp)
+void load_sections_info(model_t *model, char *file_path)
 {
+    FILE *fp = fopen(file_path, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Fail to open %s.\n", file_path);
+    }
+
+    model->sections = (section_t **)calloc(MAX_SECTIONS, sizeof(section_t *));
+    section_t **sections = model->sections;
+
     char *line = NULL;
     size_t len = 0;
 
@@ -110,11 +123,23 @@ void read_sections(section_t **sections, FILE *fp)
     }
     free(line);
 
+    fclose(fp);
+
     printf(GREEN "+ Added %d sections.\n" NO_COLOR, s_code);
 }
 
-void read_variant_info(section_t **sections, variant_t **vs, FILE *fp)
+void load_variants_info(model_t *model, char *file_path)
 {
+    FILE *fp = fopen(file_path, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Fail to open %s.\n", file_path);
+    }
+
+    model->variants = (variant_t **)calloc(MAX_VARIANT, sizeof(variant_t *));
+    section_t **sections = model->sections;
+    variant_t **vs = model->variants;
+
     char *line = NULL;
     size_t len = 0;
 
@@ -140,26 +165,12 @@ void read_variant_info(section_t **sections, variant_t **vs, FILE *fp)
         };
     }
     free(line);
+    fclose(fp);
 
     printf(GREEN "+ Added %d variants.\n" NO_COLOR, count);
 }
 
-void read_sections_variants(model_t *model)
-{
-    // Read section info
-    FILE *fp_sections = fopen("../sections.txt", "r");
-    model->sections = (section_t **)calloc(MAX_SECTIONS, sizeof(section_t *));
-    read_sections(model->sections, fp_sections);
-    fclose(fp_sections);
-
-    // Read variant sections info
-    FILE *fp_vs = fopen("../variant-sections.txt", "r");
-    model->variants = (variant_t **)calloc(MAX_VARIANT, sizeof(variant_t *));
-    read_variant_info(model->sections, model->variants, fp_vs);
-    fclose(fp_vs);
-}
-
-void destroy_sections_variants(model_t *model)
+void destroy_sections(model_t *model)
 {
     for (int i = 0; i < MAX_VARIANT; i++)
     {
@@ -182,26 +193,56 @@ void destroy_sections_variants(model_t *model)
     free(model->sections);
 }
 
-void load_model(model_t *model)
+// int load_config(model_t *model, char *config_file) {
+//     // read configuration file
+//     FILE *fp = fopen(config_file, "r");
+//     if (!fp) {
+//         fprintf(stderr, "Fail to open %s\n", config_file);
+//         return 1;
+//     }
+//
+//     char errbuf[200];
+//     toml_table_t *config = toml_parse_file(fp, errbuf, sizeof(errbuf));
+//     fclose(fp);
+//
+//     if (!config) {
+//         fprintf(stderr, "Fail to parse: %s", errbuf);
+//         return 1;
+//     }
+//
+//     model->config = config;
+//
+//     return 0;
+// }
+
+int load_model(model_t *model, config_t *config)
 {
-    load_critical_points(&model->critical_points);
-    read_sections_variants(model);
+    model->config = config;
+
+    // load critical points files
+    load_points(model, config->input_points);
+
+    // load section info
+    load_sections_info(model, config->input_sections);
+
+    // load variant info
+    load_variants_info(model, config->input_variants);
+
+    return 0;
 }
 
 void destroy_model(model_t *model)
 {
-    destroy_critical_points(&model->critical_points);
-    destroy_sections_variants(model);
+    destroy_points(&model->critical_points);
+    destroy_sections(model);
 }
 
 void save_model(model_t *model)
 {
-    char *file_path = "../sections-results.csv";
-
-    FILE *fp = fopen(file_path, "w");
+    FILE *fp = fopen(model->config->output_results, "w");
     if (fp == NULL)
     {
-        fprintf(stdout, RED "Failed to open %s." NO_COLOR, file_path);
+        fprintf(stdout, "Failed to open %s.", model->config->output_results);
     }
 
     for (int i = 0; i < MAX_SECTIONS; i++)

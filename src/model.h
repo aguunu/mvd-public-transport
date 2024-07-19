@@ -14,6 +14,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "config.h"
 #include "critical-points.h"
 #include "section.h"
 
@@ -29,12 +30,13 @@ typedef struct
 
 typedef struct
 {
+    config_t *config;
     variant_t **variants;
     section_t **sections;
     crit_points_t critical_points;
 } model_t;
 
-void load_model(model_t *model);
+int load_model(model_t *model, config_t *config);
 void save_model(model_t *model);
 void destroy_model(model_t *model);
 

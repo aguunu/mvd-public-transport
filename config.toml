@@ -1,0 +1,13 @@
+[files]
+[files.input]
+data = [
+        "../data/0.csv",
+        "../data/1.csv",
+    ]
+sections = "../sections.txt"
+points = "../critical-points.csv"
+variants = "../variant-sections.txt"
+
+[files.output]
+results = "../results.csv"
+
