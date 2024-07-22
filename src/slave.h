@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-06-22
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -14,20 +14,12 @@
 #ifndef SLAVE_H
 #define SLAVE_H
 
-#include "bus-record.h"
 #include "model.h"
+#include "work.h"
 
-#define MAX_DATA_PER_TRIP 4096
-
-#define RADIUS_THRESHOLD_M 25
+#define RADIUS_THRESHOLD_M 15
 #define SPEED_LIMIT_KM_H 45
 
-typedef struct
-{
-    int n;
-    record_t records[MAX_DATA_PER_TRIP];
-} work_t;
-
-void do_work(work_t *buf, variant_t *info, crit_points_t *critical_points);
+void slave(work_t *buf, model_t *model);
 
 #endif

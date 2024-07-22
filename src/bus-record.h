@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-22
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -32,7 +32,6 @@ typedef struct
 {
     time_t timestamp;
     int id_bus;
-    //    Variant *ptr_variant;
     int variant;
     int company;
     int hh;
@@ -42,5 +41,7 @@ typedef struct
     int subsystem;
     point_t p;
 } record_t;
+
+int is_valid(record_t *r);
 
 #endif

@@ -3,6 +3,9 @@
 data = [
         "../data/0.csv",
         "../data/1.csv",
+        "../data/2.csv",
+        "../data/3.csv",
+        "../data/4.csv",
     ]
 sections = "../sections.txt"
 points = "../critical-points.csv"
@@ -11,3 +14,6 @@ variants = "../variant-sections.txt"
 [files.output]
 results = "../results.csv"
 
+[analysis]
+from = 2024-05-01T00:00:00
+to = 2024-05-31T23:00:00

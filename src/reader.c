@@ -6,12 +6,13 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-07-19
+ * Last Modified: 2024-07-22
  *
  * License: See LICENSE file in the project root for license information.
  */
 
 #include "reader.h"
+#include "bus-record.h"
 #include "colors.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,12 +58,12 @@ int reader_init(reader_t *reader, config_t *config)
     return 0;
 }
 
-int reader_read(reader_t *reader, record_t *data)
+reader_code reader_read(reader_t *reader, record_t *data)
 {
     // Check if no files left
     if (reader->cursor == reader->n_files)
     {
-        return 1;
+        return READER_NO_RECORDS_LEFT;
     }
 
     // Read data from current file
@@ -92,9 +93,14 @@ int reader_read(reader_t *reader, record_t *data)
     }
     else if (got != 12)
     {
-        fprintf(stderr, "Expected %d, got %d values\n", 12, got);
-        return 1;
+        fprintf(stderr, RED "Expected %d, got %d values\n" NO_COLOR, 12, got);
+        return READER_PARSING_ERROR;
     }
 
-    return 0;
+    if (!is_valid(data))
+    {
+        return READER_PARSING_ERROR;
+    }
+
+    return READER_OK;
 }

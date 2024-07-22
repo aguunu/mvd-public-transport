@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-07-19
+ * Last Modified: 2024-07-22
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -59,7 +59,7 @@ void load_points(model_t *model, char *file_path)
         {
             for (int i = 0; i < HISTOGRAM_BINS; i++)
             {
-                cp->metrics.histogram[hh][i] = 0;
+                cp->metrics.histogram[i] = 0;
             }
         }
         cps->n++;
@@ -95,6 +95,11 @@ void load_sections_info(model_t *model, char *file_path)
     size_t len = 0;
 
     int s_code = 0;
+
+    int delta_t = model->config->to_t - model->config->from_t;
+    assert(delta_t > 0);
+    int total_hh = delta_t / (60 * 60);
+
     while (getline(&line, &len, fp) != -1)
     {
         assert(s_code < MAX_SECTIONS);
@@ -106,7 +111,8 @@ void load_sections_info(model_t *model, char *file_path)
 
         section->path = (point_t *)malloc(sizeof(point_t) * arr_size);
         section->n_path = 0;
-        omp_init_lock(&section->metrics.lock);
+        section->metrics = calloc(total_hh, sizeof(metrics_t));
+        // omp_init_lock(&section->metrics.lock);
         char *token = strtok(line, ";");
         while (token)
         {
@@ -122,6 +128,8 @@ void load_sections_info(model_t *model, char *file_path)
             }
             token = strtok(NULL, ";");
         }
+        section->length = section_length(section);
+        assert(section->length > 0);
         s_code++;
     }
     free(line);
@@ -188,35 +196,14 @@ void destroy_sections(model_t *model)
     {
         if (model->sections[i])
         {
-            omp_destroy_lock(&model->sections[i]->metrics.lock);
+            // omp_destroy_lock(&model->sections[i]->metrics.lock);
             free(model->sections[i]->path);
+            free(model->sections[i]->metrics);
             free(model->sections[i]);
         }
     }
     free(model->sections);
 }
-
-// int load_config(model_t *model, char *config_file) {
-//     // read configuration file
-//     FILE *fp = fopen(config_file, "r");
-//     if (!fp) {
-//         fprintf(stderr, "Fail to open %s\n", config_file);
-//         return 1;
-//     }
-//
-//     char errbuf[200];
-//     toml_table_t *config = toml_parse_file(fp, errbuf, sizeof(errbuf));
-//     fclose(fp);
-//
-//     if (!config) {
-//         fprintf(stderr, "Fail to parse: %s", errbuf);
-//         return 1;
-//     }
-//
-//     model->config = config;
-//
-//     return 0;
-// }
 
 int load_model(model_t *model, config_t *config)
 {
@@ -248,25 +235,41 @@ void save_model(model_t *model)
         fprintf(stdout, "Failed to open %s.", model->config->output_results);
     }
 
-    for (int i = 0; i < MAX_SECTIONS; i++)
-    {
-        section_t *s = model->sections[i];
-        if (!s)
-        {
-            continue;
-        }
+    time_t delta_t = model->config->to_t - model->config->from_t;
+    assert(delta_t > 0);
+    int total_hh = delta_t / (60 * 60);
+    printf("%d\n", total_hh);
 
-        fprintf(fp, "%d", i);
-        for (int hh = 0; hh < 24; hh++)
+    char date_buf[128];
+    for (int hh_idx = 0; hh_idx < total_hh; hh_idx++)
+    {
+        time_t timestamp = model->config->from_t + hh_idx * 60 * 60;
+        time_t montevideo_time = timestamp - 3600 * 3; // Montevideo time zone UTC-3
+
+        struct tm *timeinfo;
+        timeinfo = gmtime(&montevideo_time);
+
+        strftime(date_buf, sizeof(date_buf), "%Y-%m-%dT%H:%M:%S", timeinfo);
+
+        for (int section_id = 0; section_id < MAX_SECTIONS; section_id++)
         {
-            fprintf(fp, ",[");
-            for (int j = 0; j < HISTOGRAM_BINS; j++)
+            section_t *s = model->sections[section_id];
+            if (!s)
             {
-                fprintf(fp, "%d;", s->metrics.histogram[hh][j]);
+                continue;
             }
-            fprintf(fp, "]");
+
+            fprintf(fp, "%s,%d,", date_buf, section_id);
+            for (int bin = 0; bin < HISTOGRAM_BINS; bin++)
+            {
+                int count = s->metrics[hh_idx].histogram[bin];
+                fprintf(fp, "%d;", count);
+            }
+            fprintf(fp, "\n");
         }
-        fprintf(fp, "\n");
     }
+
     fclose(fp);
+
+    fprintf(stdout, MAGENTA "Results saved in \"%s\"\n" NO_COLOR, model->config->output_results);
 }

@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-07-19
+ * Last Modified: 2024-07-22
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -17,27 +17,23 @@
 #include "latlon.h"
 #include <omp.h>
 
-#define HISTOGRAM_BINS 90
-
-#define WEEKDAY 0
-#define WEEKEND 1
+#define HISTOGRAM_BINS 60
 
 typedef struct
 {
-    omp_lock_t lock;
-    int histogram[24][HISTOGRAM_BINS]; // from 0 to 90km/h
+    int histogram[HISTOGRAM_BINS];
 } metrics_t;
 
 typedef struct
 {
     int id;
     int n_path;
+    int length;
     point_t *path;
-    metrics_t metrics;
+    metrics_t *metrics;
 } section_t;
 
 float section_length(section_t *ptr_s);
 float section_d2p(section_t *ptr_s, point_t p);
-void section_add_data(section_t *ptr_s, float speed);
 
 #endif

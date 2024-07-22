@@ -6,15 +6,30 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-19
+ * Last Modified: 2024-07-22
  *
  * License: See LICENSE file in the project root for license information.
  */
 
 #include "config.h"
 #include "errno.h"
+#include "toml.h"
 #include <stdlib.h>
 #include <string.h>
+
+struct tm *parse_str_date(const char *date_str)
+{
+    // format: "2023-07-21T14:38:00Z"
+    struct tm *tm = calloc(sizeof(struct tm), 1); // must be calloc!
+
+    sscanf(date_str, "%d-%d-%dT%d:%d:%d",
+           &tm->tm_year, &tm->tm_mon, &tm->tm_mday,
+           &tm->tm_hour, &tm->tm_min, &tm->tm_sec);
+    tm->tm_year -= 1900; // Year since 1900
+    tm->tm_mon -= 1;     // Month from 0 to 11
+
+    return tm;
+}
 
 void config_init(config_t *c, char *path)
 {
@@ -48,6 +63,21 @@ void config_init(config_t *c, char *path)
     // toml_table_t *runtime = toml_table_in(c->table, "runtime");
     // toml_datum_t threads = toml_int_in(runtime, "threads");
     // toml_datum_t memory = toml_int_in(runtime, "memory");
+
+    toml_table_t *analysis = toml_table_in(c->table, "analysis");
+    const char *s;
+    // parse str to date
+    s = toml_raw_in(analysis, "from");
+    struct tm *from_date = parse_str_date(s);
+    s = toml_raw_in(analysis, "to");
+    struct tm *to_date = parse_str_date(s);
+
+    // normalize and get timestamp from dates
+    c->from_t = mktime(from_date);
+    c->to_t = mktime(to_date);
+
+    c->from_date = from_date;
+    c->to_date = to_date;
 
     c->input_sections = sections.u.s;
     c->input_variants = variants.u.s;
