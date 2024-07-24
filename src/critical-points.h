@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -23,8 +23,7 @@ typedef struct
     int id;
     point_t p;
     int type;
-    metrics_t metrics;
-    omp_lock_t lock;
+    metrics_t *metrics;
 } crit_point_t;
 
 typedef struct

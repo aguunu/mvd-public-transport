@@ -1,5 +1,6 @@
 [files]
 [files.input]
+# paths to files containing the input data to be processed
 data = [
         "../data/0.csv",
         "../data/1.csv",
@@ -7,13 +8,29 @@ data = [
         "../data/3.csv",
         "../data/4.csv",
     ]
+
+# path to file containing sections information
 sections = "../sections.txt"
+
+# path to file containing critical points information
 points = "../critical-points.csv"
+
+# path to file variants information.
 variants = "../variant-sections.txt"
 
 [files.output]
-results = "../results.csv"
+# path where the results related to sections will be saved
+sections = "../results-sections.csv"
+
+# path where the results related to points will be saved
+points = "../results-points.csv"
 
 [analysis]
+# start date and time for the analysis period
 from = 2024-05-01T00:00:00
+
+# end date and time for the analysis period
 to = 2024-05-31T23:00:00
+
+# time interval (in seconds) for analysis
+interval = 3600

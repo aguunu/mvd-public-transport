@@ -71,7 +71,18 @@ int master(reader_t *reader, model_t *model)
                 }
             }
 
-            for (int i = 0; i < WORK_MAP_ENTRIES; i++)
+            for (int i = 0; i < 24 * 60 * MAX_VARIANT; i++)
+            {
+                work_t *trip = map->arr[i];
+                if (trip != NULL)
+                {
+#pragma omp task default(none) firstprivate(trip) firstprivate(model)
+                    {
+                        slave(trip, model);
+                    }
+                }
+            }
+            /* for (int i = 0; i < WORK_MAP_ENTRIES; i++)
             {
                 work_entry_v2_t *entry = &map->entries[i];
                 for (int j = 0; j < entry->n; j++)
@@ -84,7 +95,7 @@ int master(reader_t *reader, model_t *model)
                     }
                 }
                 workers += 1;
-            }
+            } */
 
             work_map_destroy(map);
 

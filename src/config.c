@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-22
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -58,13 +58,18 @@ void config_init(config_t *c, char *path)
     toml_datum_t points = toml_string_in(input, "points");
 
     toml_table_t *output = toml_table_in(files, "output");
-    toml_datum_t results = toml_string_in(output, "results");
+    toml_datum_t results_s = toml_string_in(output, "sections");
+    toml_datum_t results_p = toml_string_in(output, "points");
 
     // toml_table_t *runtime = toml_table_in(c->table, "runtime");
     // toml_datum_t threads = toml_int_in(runtime, "threads");
     // toml_datum_t memory = toml_int_in(runtime, "memory");
 
     toml_table_t *analysis = toml_table_in(c->table, "analysis");
+
+    toml_datum_t interval = toml_int_in(analysis, "interval");
+    c->interval = interval.u.i;
+
     const char *s;
     // parse str to date
     s = toml_raw_in(analysis, "from");
@@ -82,7 +87,8 @@ void config_init(config_t *c, char *path)
     c->input_sections = sections.u.s;
     c->input_variants = variants.u.s;
     c->input_points = points.u.s;
-    c->output_results = results.u.s;
+    c->output_sections = results_s.u.s;
+    c->output_points = results_p.u.s;
 
     // c->threads = threads.u.i;
     // c->memory = threads.u.i;
@@ -103,7 +109,8 @@ void config_destroy(config_t *c)
     free(c->input_sections);
     free(c->input_variants);
     free(c->input_points);
-    free(c->output_results);
+    free(c->output_sections);
+    free(c->output_points);
     for (int i = 0; i < c->total_data_files; i++)
     {
         free(c->data_files[i]);

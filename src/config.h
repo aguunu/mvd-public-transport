@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-22
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -25,11 +25,13 @@ typedef struct
     char *input_sections;
     char *input_variants;
     char *input_points;
-    char *output_results;
+    char *output_sections;
+    char *output_points;
     struct tm *from_date;
     struct tm *to_date;
     time_t from_t;
     time_t to_t;
+    int interval;
     // int threads;
     // int memory;
 } config_t;

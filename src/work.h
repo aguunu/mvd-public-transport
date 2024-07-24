@@ -6,16 +6,13 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-20
- * Last Modified: 2024-07-22
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
 
 #ifndef WORK_H
 #define WORK_H
-
-#define WORK_MAP_ENTRIES 256 * 1024 // MUST BE POWER OF 2
-#define WORK_ENTRY_INIT_MAX 8
 
 #define MAX_HH 24
 #define MAX_MM 60
@@ -48,14 +45,7 @@ typedef struct
 
 typedef struct
 {
-    int n;
-    int max;
-    work_t **work;
-} work_entry_v2_t;
-
-typedef struct
-{
-    work_entry_v2_t entries[WORK_MAP_ENTRIES];
+    work_t **arr;
 } work_map_t;
 
 work_map_t *work_map_init();

@@ -6,13 +6,14 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-20
- * Last Modified: 2024-07-22
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
 
 #include "work.h"
 #include "assert.h"
+#include "model.h"
 #include "stdlib.h"
 
 work_map_t *work_map_init()
@@ -20,148 +21,93 @@ work_map_t *work_map_init()
     work_map_t *map = (work_map_t *)malloc(sizeof(work_map_t));
     assert(map != NULL);
 
-    for (int i = 0; i < WORK_MAP_ENTRIES; i++)
-    {
-        work_entry_v2_t *entry = &map->entries[i];
+    map->arr = calloc(24 * 60 * MAX_VARIANT, sizeof(work_t *));
 
-        entry->n = 0;
-        entry->max = WORK_ENTRY_INIT_MAX;
-        entry->work = (work_t **)malloc(sizeof(work_t *) * entry->max);
-        assert(entry->work != NULL);
-
-        for (int j = entry->n; j < entry->max; j++)
-        {
-            entry->work[j] = NULL;
-        }
-    }
     return map;
 }
 
 void work_map_destroy(work_map_t *map)
 {
-    for (int i = 0; i < WORK_MAP_ENTRIES; i++)
-    {
-        free(map->entries[i].work);
-    }
+    free(map->arr);
     free(map);
 }
 
-void work_push(work_t *work, record_t *data)
-{
-    assert(work->n < MAX_DATA_PER_TRIP);
-    int lst_idx = work->n;
-    work->records[lst_idx].timestamp = data->timestamp;
-    work->records[lst_idx].p = data->p;
-    work->n++;
-}
-
-int should_be_proccesed(work_t *work, time_t current_t)
+int is_diff_trip(work_t *work, record_t *r)
 {
     assert(work != NULL);
-    if (work->n > 0)
+    assert(work->n > 0);
+
+    time_t current_t = r->timestamp;
+    time_t delta_t = current_t - work->records[0].timestamp;
+
+    if (
+        work->id_bus != r->id_bus ||
+        delta_t <= 0 ||
+        delta_t > TRIP_LENGTH_THRESHOLD ||
+        work->n == MAX_DATA_PER_TRIP)
     {
-        // check if trip to process
-        time_t delta_t = current_t - work->records[0].timestamp;
-        // assert(delta_t >= 0);
-        if (delta_t <= 0 || delta_t > TRIP_LENGTH_THRESHOLD || work->n == MAX_DATA_PER_TRIP)
-        {
-            return 1;
-        }
+        return 1;
     }
+
     return 0;
-}
-
-int work_cmp(work_t *data1, record_t *data2)
-{
-    return (
-        data1->id_bus == data2->id_bus &&
-        data1->hh == data2->hh &&
-        data1->mm == data2->mm &&
-        data1->variant == data2->variant &&
-        data1->type == data2->type &&
-        data1->company == data2->company &&
-        data1->subsystem == data2->subsystem &&
-        data1->destination == data2->destination);
-}
-
-int hash_record(record_t *r)
-{
-    return r->variant * (r->hh * 3600 + r->mm * 60);
 }
 
 work_t *work_map_add(work_map_t *map, record_t *data)
 {
+    int frequency = data->hh * 60 + data->mm;
+    int mm_per_day = 24 * 60;
+    int idx = mm_per_day * data->variant + frequency;
 
-    assert(map != NULL);
-    assert(map->entries != NULL);
+    assert(idx < mm_per_day * MAX_VARIANT);
 
-    // compute index
-    int idx = hash_record(data) & (WORK_MAP_ENTRIES - 1);
-    assert(idx >= 0);
-    assert(idx < WORK_MAP_ENTRIES);
-
-    work_entry_v2_t *entry = &map->entries[idx];
-
-    // find entry cursor
-    int cursor = -1;
-    for (int i = 0; i < entry->n; i++)
+    if (map->arr[idx] == NULL)
     {
-        work_t *w = entry->work[i];
-        if (w != NULL && work_cmp(w, data))
-        {
-            cursor = i;
-            break;
-        }
-        else if (w == NULL)
-        {
-            // null cursor
-            cursor = i;
-        }
+        map->arr[idx] = malloc(sizeof(work_t));
+        map->arr[idx]->n = 0;
+        map->arr[idx]->id_bus = data->id_bus;
+        map->arr[idx]->variant = data->variant;
+        map->arr[idx]->company = data->company;
+        map->arr[idx]->hh = data->hh;
+        map->arr[idx]->mm = data->mm;
+        map->arr[idx]->type = data->type;
+        map->arr[idx]->destination = data->destination;
+        map->arr[idx]->subsystem = data->subsystem;
     }
 
-    // if not cursor (not found neither null entry)
-    if (cursor == -1)
+    assert(map->arr[idx] != NULL);
+
+    // check if work buf from different trip
+    if (map->arr[idx]->n != 0 && is_diff_trip(map->arr[idx], data))
     {
-        cursor = entry->n;
-        entry->max += 128;
-        // assert(entry->max <= 4096);
-        entry->work = realloc(entry->work, sizeof(work_t *) * entry->max);
-        assert(entry->work != NULL);
-        for (int i = entry->n; i < entry->max; i++)
-        {
-            entry->work[i] = NULL;
-        }
-        entry->n++;
+        work_t *work = map->arr[idx];
+        map->arr[idx] = NULL;
+
+        return work;
     }
 
-    assert(cursor != -1);
-    assert(cursor < entry->max);
-    if (entry->work[cursor] == NULL)
+    assert(map->arr[idx] != NULL);
+    int n = map->arr[idx]->n;
+    map->arr[idx]->records[n].timestamp = data->timestamp;
+    map->arr[idx]->records[n].p = data->p;
+    map->arr[idx]->n++;
+
+    assert(map->arr[idx]->id_bus == data->id_bus);
+    assert(map->arr[idx]->variant == data->variant);
+    assert(map->arr[idx]->company == data->company);
+    assert(map->arr[idx]->hh == data->hh);
+    assert(map->arr[idx]->mm == data->mm);
+    assert(map->arr[idx]->type == data->type);
+    assert(map->arr[idx]->destination == data->destination);
+    assert(map->arr[idx]->subsystem == data->subsystem);
+
+    // check if work buf is full
+    if (map->arr[idx]->n == MAX_DATA_PER_TRIP)
     {
-        entry->work[cursor] = malloc(sizeof(work_t));
-        // copy data from record_t to work_t
-        entry->work[cursor]->id_bus = data->id_bus;
-        entry->work[cursor]->variant = data->variant;
-        entry->work[cursor]->company = data->company;
-        entry->work[cursor]->hh = data->hh;
-        entry->work[cursor]->mm = data->mm;
-        entry->work[cursor]->type = data->type;
-        entry->work[cursor]->destination = data->destination;
-        entry->work[cursor]->subsystem = data->subsystem;
-        entry->work[cursor]->n = 0;
+        work_t *work = map->arr[idx];
+        map->arr[idx] = NULL;
+
+        return work;
     }
-
-    assert(entry->work[cursor] != NULL);
-
-    if (should_be_proccesed(entry->work[cursor], data->timestamp))
-    {
-        work_t *ready_work = entry->work[cursor];
-        entry->work[cursor] = NULL;
-        return ready_work;
-    }
-
-    // add data to current work
-    work_push(entry->work[cursor], data);
 
     return NULL;
 }
