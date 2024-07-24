@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-27
+ * Last Modified: 2024-07-24
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -52,7 +52,7 @@ float crossarc(point_t p1, point_t p2, point_t p3)
     float phi2 = deg2rad(p2.lat);
     float lambda2 = deg2rad(p2.lon);
     float phi3 = deg2rad(p3.lat);
-    float lambda3 = deg2rad(p2.lon);
+    float lambda3 = deg2rad(p3.lon);
 
     float theta12 = bear(phi1, lambda1, phi2, lambda2);
     float theta13 = bear(phi1, lambda1, phi3, lambda3);
