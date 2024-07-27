@@ -34,3 +34,6 @@ to = 2024-05-31T23:00:00
 
 # time interval (in seconds) for analysis
 interval = 3600
+
+# if save processed results or not
+save_results = true

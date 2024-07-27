@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-24
+ * Last Modified: 2024-07-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -32,6 +32,7 @@ typedef struct
     time_t from_t;
     time_t to_t;
     int interval;
+    int save_results;
     // int threads;
     // int memory;
 } config_t;

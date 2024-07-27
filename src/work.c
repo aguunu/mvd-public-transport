@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-20
- * Last Modified: 2024-07-24
+ * Last Modified: 2024-07-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -32,6 +32,21 @@ void work_map_destroy(work_map_t *map)
     free(map);
 }
 
+int record_from_work(work_t *work, record_t *r)
+{
+    int eq = 1;
+    eq &= work->id_bus == r->id_bus;
+    eq &= work->variant == r->variant;
+    eq &= work->company == r->company;
+    eq &= work->hh == r->hh;
+    eq &= work->mm == r->mm;
+    eq &= work->type == r->type;
+    eq &= work->destination == r->destination;
+    eq &= work->subsystem == r->subsystem;
+
+    return eq;
+}
+
 int is_diff_trip(work_t *work, record_t *r)
 {
     assert(work != NULL);
@@ -41,7 +56,7 @@ int is_diff_trip(work_t *work, record_t *r)
     time_t delta_t = current_t - work->records[0].timestamp;
 
     if (
-        work->id_bus != r->id_bus ||
+        !record_from_work(work, r) ||
         delta_t <= 0 ||
         delta_t > TRIP_LENGTH_THRESHOLD ||
         work->n == MAX_DATA_PER_TRIP)

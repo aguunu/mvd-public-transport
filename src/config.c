@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-07-17
- * Last Modified: 2024-07-24
+ * Last Modified: 2024-07-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -69,6 +69,9 @@ void config_init(config_t *c, char *path)
 
     toml_datum_t interval = toml_int_in(analysis, "interval");
     c->interval = interval.u.i;
+
+    toml_datum_t save_results = toml_bool_in(analysis, "save_results");
+    c->save_results = save_results.u.b;
 
     const char *s;
     // parse str to date

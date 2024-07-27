@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-18
- * Last Modified: 2024-07-24
+ * Last Modified: 2024-07-27
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -101,7 +101,7 @@ void section_analysis(work_t *data, model_t *model)
             int seconds_per_hour = 60 * 60;
             int histogram_idx = (data1.timestamp - model->config->from_t) / (seconds_per_hour);
 
-#pragma omp atomic
+#pragma omp atomic update
             info->sections[i]->metrics[histogram_idx].histogram[round_speed]++;
         }
     }
@@ -170,7 +170,7 @@ void instant_speed_analysis_v2(work_t *buf, model_t *model)
                     int seconds_per_hour = 60 * 60;
                     int histogram_idx = (t - model->config->from_t) / (seconds_per_hour);
 
-#pragma omp atomic
+#pragma omp atomic update
                     p->metrics[histogram_idx].histogram[round_speed]++;
                 }
             }
@@ -200,10 +200,6 @@ void instant_speed_analysis(work_t *buf, model_t *model)
         float instant_speed = (delta_d / delta_t) * 3.6;
         assert(instant_speed >= 0);
 
-        if (instant_speed > SPEED_LIMIT_KM_H)
-        {
-            // TODO
-        }
         for (int j = 0; j < cps->n; j++)
         {
             crit_point_t *cp = &cps->p[j];
@@ -236,8 +232,7 @@ void slave(work_t *buf, model_t *model)
     assert(buf->n > 0);
     assert(buf->n <= MAX_DATA_PER_TRIP);
 
-    int vcode = buf->variant;
-    if (model->variants[vcode])
+    if (model->variants[buf->variant] != NULL)
     {
         section_analysis(buf, model);
     }
