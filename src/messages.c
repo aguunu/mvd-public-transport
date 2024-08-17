@@ -6,7 +6,7 @@
  *     Paula Abbona <paula.abbona@fing.edu.uy>
  *
  * Creation Date: 2024-06-12
- * Last Modified: 2024-06-12
+ * Last Modified: 2024-08-17
  *
  * License: See LICENSE file in the project root for license information.
  */
@@ -56,9 +56,10 @@ void description()
 void options()
 {
     fprintf(stdout, BROWN "Options:\n\n" NO_COLOR);
-    fprintf(stdout, GRAY "\t-v | --version\n" NO_COLOR "\t\tPrints %s version\n\n", __PROGRAM_NAME__);
-    fprintf(stdout, GRAY "\t-h | --help\n" NO_COLOR "\t\tPrints this help message\n\n");
-    fprintf(stdout, GRAY "\t--no-color\n" NO_COLOR "\t\tDoes not use colors for printing\n\n");
+    fprintf(stdout, GRAY "\t-v | --version\n" NO_COLOR "\t\tPrints %s version.\n\n", __PROGRAM_NAME__);
+    fprintf(stdout, GRAY "\t-h | --help\n" NO_COLOR "\t\tPrints a help message.\n\n");
+    fprintf(stdout, GRAY "\t--no-colors\n" NO_COLOR "\t\tDoes not use colors for printing.\n\n");
+    fprintf(stdout, GRAY "\t--threads\n" NO_COLOR "\t\tNumber of threads to use by the program.\n\n");
 }
 
 /*

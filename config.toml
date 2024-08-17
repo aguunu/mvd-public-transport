@@ -2,28 +2,26 @@
 [files.input]
 # paths to files containing the input data to be processed
 data = [
-        "../data/0.csv",
-        "../data/1.csv",
-        "../data/2.csv",
-        "../data/3.csv",
-        "../data/4.csv",
+        "input/chunk-0.csv",
+        "input/chunk-1.csv",
+        "input/chunk-2.csv",
     ]
 
 # path to file containing sections information
-sections = "../sections.txt"
+sections = "input/sections.txt"
 
 # path to file containing critical points information
-points = "../critical-points.csv"
+points = "input/critical-points.csv"
 
 # path to file variants information.
-variants = "../variant-sections.txt"
+variants = "input/variant-sections.txt"
 
 [files.output]
 # path where the results related to sections will be saved
-sections = "../results-sections.csv"
+sections = "input/results-sections.csv"
 
 # path where the results related to points will be saved
-points = "../results-points.csv"
+points = "input/results-points.csv"
 
 [analysis]
 # start date and time for the analysis period
